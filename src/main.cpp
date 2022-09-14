@@ -16,30 +16,37 @@ GLuint VAO;
 GLuint shaderProgram;
 
 float vertices[] = {
-	0.f, 0.5f, 0.f,
-	0.5f, -0.5f, 0.f,
-	-0.5f, -0.5f, 0.f
+	// x, y, z, r, g, b
+	0.f, 0.5f, 0.f, 1.f, 0.f, 0.f,
+	0.5f, -0.5f, 0.f, 0.f, 1.f, 0.f,
+	-0.5f, -0.5f, 0.f, 0.f, 0.f, 1.f
 };
 
 const char* vstriangleSrc = R"GLSL(
 #version 450 core
 
 layout(location = 0) in vec3 aPos;
+layout(location = 1) in vec3 aColor;
+
+out vec3 oFrag;
 
 void main()
 {
 	gl_Position = vec4(aPos, 1.0);
+	oFrag = aColor;
 }
 )GLSL";
 
 const char* fstriangleSrc = R"GLSL(
 #version 450 core
 
+in vec3 oFrag;
+
 out vec4 oColor;
 
 void main()
 {
-	oColor = vec4(1.0, 0.0, 0.0, 1.0);
+	oColor = vec4(oFrag, 1.0);
 }
 )GLSL";
 
@@ -74,7 +81,9 @@ void openglVertexArray()
 	glBindVertexArray(VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FLOAT, 3 * sizeof(float), (void*)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FLOAT, 6 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FLOAT, 6 * sizeof(float), (void*)(3 * sizeof(float)));
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 }
