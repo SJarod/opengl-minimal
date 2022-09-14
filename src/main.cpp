@@ -5,45 +5,41 @@
 
 void windowInit();
 void openglInit();
+void openglVertexBuffer();
+void openglVertexArray();
 void openglCompileShaders();
+void drawFrame();
 
 GLFWwindow* window;
+GLuint VBO;
+GLuint VAO;
 GLuint shaderProgram;
 
+float vertices[] = {
+	0.f, 0.5f, 0.f,
+	0.5f, -0.5f, 0.f,
+	-0.5f, -0.5f, 0.f
+};
+
 const char* vstriangleSrc = R"GLSL(
-#version 450
+#version 450 core
 
-out vec3 vertexColor;
-
-vec2 positions[3] = {
-	vec2(0.0, -0.5),
-	vec2(0.5, 0.5),
-	vec2(-0.5, 0.5)
-};
-
-vec3 colors[3] = {
-	vec3(1.0, 0.0, 0.0),
-	vec3(0.0, 1.0, 0.0),
-	vec3(0.0, 0.0, 1.0)
-};
+layout(location = 0) in vec3 aPos;
 
 void main()
 {
-	gl_Position = vec4(positions[gl_VertexID], 0.0, 1.0);
-	vertexColor = colors[gl_VertexID];
+	gl_Position = vec4(aPos, 1.0);
 }
 )GLSL";
 
 const char* fstriangleSrc = R"GLSL(
-#version 450
+#version 450 core
 
-in vec3 vertexColor;
-
-layout(location = 0) out vec4 oColor;
+out vec4 oColor;
 
 void main()
 {
-	oColor = vec4(vertexColor, 1.0);
+	oColor = vec4(1.0, 0.0, 0.0, 1.0);
 }
 )GLSL";
 
@@ -62,6 +58,25 @@ void openglInit()
 {
 	if (!gladLoadGL(glfwGetProcAddress))
 		throw std::exception("Failed to load OpenGL functions");
+}
+
+void openglVertexBuffer()
+{
+	glGenBuffers(1, &VBO);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+}
+
+void openglVertexArray()
+{
+	glGenVertexArrays(1, &VAO);
+	glBindVertexArray(VAO);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FLOAT, 3 * sizeof(float), (void*)0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
 }
 
 void openglCompileShaders()
@@ -98,6 +113,19 @@ void openglCompileShaders()
 	glDeleteShader(fs);
 }
 
+void drawFrame()
+{
+	glViewport(0, 0, 800, 600);
+
+	glClearColor(0.2f, 0.2f, 0.2f, 1.f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	glUseProgram(shaderProgram);
+	glBindVertexArray(VAO);
+	glDrawArrays(GL_TRIANGLES, 0, 3);
+	glBindVertexArray(0);
+}
+
 int main()
 {
 	try
@@ -106,11 +134,15 @@ int main()
 
 		windowInit();
 		openglInit();
+		openglVertexBuffer();
+		openglVertexArray();
 		openglCompileShaders();
 
 		while (!glfwWindowShouldClose(window))
 		{
+			glfwSwapBuffers(window);
 			glfwPollEvents();
+			drawFrame();
 		}
 	}
 	catch (const std::exception& ex)
