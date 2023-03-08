@@ -18,6 +18,6 @@ add_subdirectory(externals)
 add_executable(gl src/main.cpp)
 target_include_directories(gl PRIVATE include)
 target_link_libraries(gl
-    PUBLIC glad
+    PUBLIC glad_gl_core_46
     PUBLIC glfw
 )
