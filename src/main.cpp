@@ -3,17 +3,29 @@
 
 #include <iostream>
 
-void windowInit();
-void openglInit();
-void openglVertexBuffer();
-void openglVertexArray();
-void openglCompileShaders();
-void drawFrame();
+
+
+void init_wsi();
+void terminate_wsi();
+
+void create_window();
+void destroy_window();
+
+void opengl_load_symbols();
+
+void opengl_create_vertex_buffer();
+void opengl_create_vertex_array();
+
+void opengl_compile_shaders();
+
+void draw_frame();
+
 
 GLFWwindow* window;
 GLuint VBO;
 GLuint VAO;
 GLuint shaderProgram;
+
 
 float vertices[] = {
 	// x, y, z, r, g, b
@@ -50,24 +62,26 @@ void main()
 }
 )GLSL";
 
-void windowInit()
+
+void create_window()
 {
 	// OpenGL core 4.6
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
+	
 	window = glfwCreateWindow(800, 600, "OpenGL window", nullptr, nullptr);
 	glfwMakeContextCurrent(window);
 }
 
-void openglInit()
+void opengl_load_symbols()
 {
 	if (!gladLoadGL(glfwGetProcAddress))
 		throw std::exception("Failed to load OpenGL functions");
 }
 
-void openglVertexBuffer()
+void opengl_create_vertex_buffer()
 {
 	glGenBuffers(1, &VBO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
@@ -75,7 +89,7 @@ void openglVertexBuffer()
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-void openglVertexArray()
+void opengl_create_vertex_array()
 {
 	glGenVertexArrays(1, &VAO);
 	glBindVertexArray(VAO);
@@ -88,7 +102,7 @@ void openglVertexArray()
 	glBindVertexArray(0);
 }
 
-void openglCompileShaders()
+void opengl_compile_shaders()
 {
 	GLuint vs = glCreateShader(GL_VERTEX_SHADER);
 	glShaderSource(vs, 1, &vstriangleSrc, NULL);
@@ -122,7 +136,7 @@ void openglCompileShaders()
 	glDeleteShader(fs);
 }
 
-void drawFrame()
+void draw_frame()
 {
 	glViewport(0, 0, 800, 600);
 
@@ -141,17 +155,17 @@ int main()
 	{
 		glfwInit();
 
-		windowInit();
-		openglInit();
-		openglVertexBuffer();
-		openglVertexArray();
-		openglCompileShaders();
+		create_window();
+		opengl_load_symbols();
+		opengl_create_vertex_buffer();
+		opengl_create_vertex_array();
+		opengl_compile_shaders();
 
 		while (!glfwWindowShouldClose(window))
 		{
 			glfwSwapBuffers(window);
 			glfwPollEvents();
-			drawFrame();
+			draw_frame();
 		}
 	}
 	catch (const std::exception& ex)
