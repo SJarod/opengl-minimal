@@ -151,6 +151,9 @@ void draw_frame()
 
 int main()
 {
+	// TODO : ubo (mvp)
+	// TODO : texture
+	
 	try
 	{
 		glfwInit();
