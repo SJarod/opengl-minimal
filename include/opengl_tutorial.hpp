@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iostream>
+#include <exception>
 
 #include <glad/gl.h>
 #include "wsi.hpp"
@@ -11,7 +12,7 @@
 inline void opengl_load_symbols()
 {
 	if (!gladLoadGL((GLADloadfunc)get_proc_addr()))
-		throw std::exception("Failed to load OpenGL functions");
+		throw ("Failed to load OpenGL functions");
 }
 
 inline void opengl_create_vertex_buffer(GLuint& handle,
@@ -64,7 +65,7 @@ inline void opengl_compile_shaders(GLuint& spHandle, const char* vsSource, const
 		glGetShaderInfoLog(fs, 512, NULL, infoLog[1]);
 		std::cout << infoLog[1] << std::endl;
 
-		throw std::exception("Failed to compile shaders");
+		throw ("Failed to compile shaders");
 	}
 
 	spHandle = glCreateProgram();
