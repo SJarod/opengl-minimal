@@ -3,7 +3,7 @@
 #include <GLFW/glfw3.h>
 
 
-// Window System Integration
+// Window System Interface
 
 typedef void (*proc_addr)();
 

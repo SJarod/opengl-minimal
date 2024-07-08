@@ -1,6 +1,9 @@
 #include "opengl_tutorial.hpp"
 
 
+// TODO : remove glad and load opengl functions from dll
+
+
 float vertices[] = {
 	// x, y, z, r, g, b
 	0.f, 0.5f, 0.f, 1.f, 0.f, 0.f,
