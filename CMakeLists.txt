@@ -11,11 +11,11 @@ if(NOT GIT_RESULT EQUAL "0")
     message(FATAL_ERROR "Failed to update submodules, ${GIT_RESULT}")
 endif()
 
-project(opengl-tutorial)
+project(opengl-minimal)
 
 add_subdirectory(externals)
 
-add_executable(gl include/wsi.hpp include/opengl_tutorial.hpp src/main.cpp)
+add_executable(gl include/wsi.hpp include/opengl_minimal.hpp src/main.cpp)
 target_include_directories(gl PRIVATE include)
 target_link_libraries(gl
     PUBLIC glad_gl_core_46

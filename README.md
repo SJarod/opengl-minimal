@@ -1,4 +1,4 @@
-# **OpenGL-tutorial**
+# **OpenGL-Minimal**
 
 Rendering a simple triangle with OpenGL.
 

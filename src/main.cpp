@@ -1,17 +1,12 @@
-#include "opengl_tutorial.hpp"
-
+#include "opengl_minimal.hpp"
 
 // TODO : remove glad and load opengl functions from dll
 
-
 float vertices[] = {
-	// x, y, z, r, g, b
-	0.f, 0.5f, 0.f, 1.f, 0.f, 0.f,
-	0.5f, -0.5f, 0.f, 0.f, 1.f, 0.f,
-	-0.5f, -0.5f, 0.f, 0.f, 0.f, 1.f
-};
+    // x, y, z, r, g, b
+    0.f, 0.5f, 0.f, 1.f, 0.f, 0.f, 0.5f, -0.5f, 0.f, 0.f, 1.f, 0.f, -0.5f, -0.5f, 0.f, 0.f, 0.f, 1.f};
 
-const char* vstriangleSrc = R"GLSL(
+const char *vstriangleSrc = R"GLSL(
 #version 450 core
 
 layout(location = 0) in vec3 aPos;
@@ -26,7 +21,7 @@ void main()
 }
 )GLSL";
 
-const char* fstriangleSrc = R"GLSL(
+const char *fstriangleSrc = R"GLSL(
 #version 450 core
 
 in vec3 oFrag;
@@ -39,45 +34,48 @@ void main()
 }
 )GLSL";
 
-
 int main()
 {
-	// TODO : ubo (mvp)
-	// TODO : texture
+    // TODO : ubo (mvp)
+    // TODO : texture
 
-	GLuint vbo;
-	GLuint vao;
-	GLuint shaderProgram;
-	
-	try
-	{
-		init_wsi();
+    GLuint vbo;
+    GLuint vao;
+    GLuint shaderProgram;
 
-		GLFWwindow* window = create_window();
+    WSI::init();
 
-		opengl_load_symbols();
+    int width = 1366, height = 768;
 
-		opengl_create_vertex_buffer(vbo, vertices, sizeof(vertices));
-		opengl_create_vertex_array(vao, vbo);
-		opengl_compile_shaders(shaderProgram, vstriangleSrc, fstriangleSrc);
+    GLFWwindow *window = WSI::create_window(width, height, "OpenGL Minimal");
 
-		while (!glfwWindowShouldClose(window))
-		{
-			glfwSwapBuffers(window);
-			glfwPollEvents();
+    RHI::load_symbols();
 
-			draw_frame(shaderProgram, vao);
-		}
+    RHI::Memory::create_vertex_buffer(vbo, vertices, sizeof(vertices));
+    RHI::Memory::create_vertex_array(vao, vbo);
+    RHI::Shader::compile_shaders(shaderProgram, vstriangleSrc, fstriangleSrc);
 
-		destroy_window(window);
+    while (!glfwWindowShouldClose(window))
+    {
+        glfwSwapBuffers(window);
+        glfwPollEvents();
 
-		terminate_wsi();
-	}
-	catch (const std::exception& ex)
-	{
-		std::cerr << ex.what() << std::endl;
-		return EXIT_FAILURE;
-	}
-	
-	return EXIT_SUCCESS;
+        glViewport(0, 0, width, height);
+
+        glClearColor(0.2f, 0.2f, 0.2f, 1.f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        glUseProgram(shaderProgram);
+        glBindVertexArray(vao);
+
+        glDrawArrays(GL_TRIANGLES, 0, 3);
+
+        glBindVertexArray(0);
+    }
+
+    WSI::destroy_window(window);
+
+    WSI::terminate();
+
+    return EXIT_SUCCESS;
 }
