@@ -3,6 +3,9 @@
 #include <iostream>
 
 #include <glad/gl.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 #include "vertex.hpp"
 #include "wsi.hpp"
@@ -122,6 +125,7 @@ inline GLuint create_shader_program(const char *vsSource, const char *fsSource)
         std::cout << infoLog[1] << std::endl;
 
         std::cerr << "Failed to compile shaders" << std::endl;
+        return -1;
     }
 
     program = glCreateProgram();
@@ -138,22 +142,34 @@ inline void destroy_shader_program(GLuint program)
 {
     glDeleteProgram(program);
 }
+
+inline void set_uniform_matrix4(GLuint program, const char *uniformName, glm::mat4 matrix)
+{
+    GLuint location = glGetUniformLocation(program, uniformName);
+    glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(matrix));
+}
 } // namespace Shader
 
 namespace Render
 {
-inline void draw_object(GLuint program, GLuint vao, int vertexCount)
+inline void draw_object(GLuint program, GLuint vao, int vertexCount, bool bEnableDepthTest = true)
 {
     glUseProgram(program);
+
+    if (bEnableDepthTest)
+        glEnable(GL_DEPTH_TEST);
 
     glBindVertexArray(vao);
     glDrawArrays(GL_TRIANGLES, 0, vertexCount);
     glBindVertexArray(0);
 }
 
-inline void draw_element_object(GLuint program, GLuint vao, GLuint ebo, int indexCount)
+inline void draw_element_object(GLuint program, GLuint vao, GLuint ebo, int indexCount, bool bEnableDepthTest = true)
 {
     glUseProgram(program);
+
+    if (bEnableDepthTest)
+        glEnable(GL_DEPTH_TEST);
 
     glBindVertexArray(vao);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);

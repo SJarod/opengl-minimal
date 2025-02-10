@@ -11,9 +11,6 @@
 
 int main()
 {
-    // TODO : ubo (mvp)
-    // TODO : texture
-
     WSI::init();
 
     int width = 1366, height = 768;
@@ -51,6 +48,14 @@ int main()
 
         glClearColor(0.2f, 0.2f, 0.2f, 1.f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        glm::mat4 model = glm::mat4(1.f);
+        glm::mat4 view = glm::lookAt(glm::vec3(0.f, 1.f, 1.f), glm::vec3(0.f), glm::vec3(0.f, 1.f, 0.f));
+        glm::mat4 proj = glm::perspective(glm::radians(45.f), width / (float)height, 0.1f, 1000.f);
+
+        RHI::Shader::set_uniform_matrix4(program, "model", model);
+        RHI::Shader::set_uniform_matrix4(program, "view", view);
+        RHI::Shader::set_uniform_matrix4(program, "proj", proj);
 
         RHI::Render::bind_texture(tex);
         RHI::Render::draw_element_object(program, vao, ebo, indices.size());
