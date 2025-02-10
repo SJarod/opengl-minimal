@@ -3,6 +3,8 @@
 #include <iostream>
 
 #include <glad/gl.h>
+
+#include "vertex.hpp"
 #include "wsi.hpp"
 
 namespace RHI
@@ -16,36 +18,61 @@ inline void load_symbols()
 
 namespace Memory
 {
-inline void create_vertex_buffer(GLuint &handle, const float *vertices, const unsigned int &vertexCount)
+namespace Buffer
 {
-    glGenBuffers(1, &handle);
-    glBindBuffer(GL_ARRAY_BUFFER, handle);
-    glBufferData(GL_ARRAY_BUFFER, vertexCount * sizeof(float), vertices, GL_STATIC_DRAW);
+inline GLuint create_vertex_buffer(std::vector<Vertex> vertices)
+{
+    GLuint buffer;
+    glGenBuffers(1, &buffer);
+    glBindBuffer(GL_ARRAY_BUFFER, buffer);
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), vertices.data(), GL_STATIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
+    return buffer;
 }
-inline void create_vertex_array(GLuint &handle, const GLuint &vbo)
+inline void destroy_vertex_buffer(GLuint buffer)
 {
-    glGenVertexArrays(1, &handle);
-    glBindVertexArray(handle);
+    glDeleteBuffers(1, &buffer);
+}
+
+inline GLuint create_vertex_array(const GLuint &vbo)
+{
+    GLuint array;
+    glGenVertexArrays(1, &array);
+    glBindVertexArray(array);
 
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
     // strides
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FLOAT, 6 * sizeof(float), (void *)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FLOAT, sizeof(Vertex), (void *)offsetof(Vertex, position));
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FLOAT, 6 * sizeof(float), (void *)(3 * sizeof(float)));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FLOAT, sizeof(Vertex), (void *)offsetof(Vertex, color));
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FLOAT, sizeof(Vertex), (void*)offsetof(Vertex, uv));
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     glBindVertexArray(0);
+    return array;
 }
+inline void destroy_vertex_array(GLuint array)
+{
+    glDeleteVertexArrays(1, &array);
+}
+} // namespace Buffer
+
+namespace Image
+{
+
+} // namespace Image
 } // namespace Memory
 
 namespace Shader
 {
-inline void compile_shaders(GLuint &spHandle, const char *vsSource, const char *fsSource)
+inline GLuint create_shader_program(const char *vsSource, const char *fsSource)
 {
+    GLuint program;
+
     GLuint vs = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vs, 1, &vsSource, NULL);
     glCompileShader(vs);
@@ -69,13 +96,19 @@ inline void compile_shaders(GLuint &spHandle, const char *vsSource, const char *
         std::cerr << "Failed to compile shaders" << std::endl;
     }
 
-    spHandle = glCreateProgram();
-    glAttachShader(spHandle, vs);
-    glAttachShader(spHandle, fs);
-    glLinkProgram(spHandle);
+    program = glCreateProgram();
+    glAttachShader(program, vs);
+    glAttachShader(program, fs);
+    glLinkProgram(program);
 
     glDeleteShader(vs);
     glDeleteShader(fs);
+
+    return program;
+}
+inline void destroy_shader_program(GLuint program)
+{
+    glDeleteProgram(program);
 }
 } // namespace Shader
 } // namespace RHI

@@ -20,4 +20,5 @@ target_include_directories(gl PRIVATE include)
 target_link_libraries(gl
     PUBLIC glad_gl_core_46
     PUBLIC glfw
+    PUBLIC glm
 )
