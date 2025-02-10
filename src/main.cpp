@@ -30,8 +30,13 @@ int main()
                                           {{0.5f, -0.5f, -0.5f}, {0.f, 1.f, 0.f, 1.f}, {0.f, 0.f}},
                                           {{0.5f, 0.5f, -0.5f}, {0.f, 0.f, 1.f, 1.f}, {0.f, 1.f}},
                                           {{-0.5f, 0.5f, -0.5f}, {1.f, 1.f, 1.f, 1.f}, {1.f, 1.f}}};
-    GLuint vbo = RHI::Memory::Buffer::create_vertex_buffer(vertices);
-    GLuint vao = RHI::Memory::Buffer::create_vertex_array(vbo);
+    GLuint vbo = RHI::Memory::Buffer::create_buffer<Vertex>(vertices, GL_ARRAY_BUFFER);
+
+    const std::vector<unsigned int> indices = {0, 1, 2, 2, 3, 0, 4, 5, 6, 6, 7, 4};
+    GLuint ebo = RHI::Memory::Buffer::create_buffer<unsigned int>(indices, GL_ELEMENT_ARRAY_BUFFER);
+
+    GLuint vao = RHI::Memory::Buffer::create_vertex_array(vbo, &ebo);
+
     GLuint program = RHI::Shader::create_shader_program(triangleVertSrc, triangleFragSrc);
 
     while (!glfwWindowShouldClose(window))
@@ -44,12 +49,7 @@ int main()
         glClearColor(0.2f, 0.2f, 0.2f, 1.f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        glUseProgram(program);
-        glBindVertexArray(vao);
-
-        glDrawArrays(GL_TRIANGLES, 0, 3);
-
-        glBindVertexArray(0);
+        RHI::Render::draw_element_object(program, vao, ebo, indices.size());
     }
 
     WSI::destroy_window(window);

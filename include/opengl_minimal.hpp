@@ -20,27 +20,29 @@ namespace Memory
 {
 namespace Buffer
 {
-inline GLuint create_vertex_buffer(std::vector<Vertex> vertices)
+template <typename TType> inline GLuint create_buffer(std::vector<TType> data, GLenum usageFlags)
 {
     GLuint buffer;
     glGenBuffers(1, &buffer);
-    glBindBuffer(GL_ARRAY_BUFFER, buffer);
-    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), vertices.data(), GL_STATIC_DRAW);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindBuffer(usageFlags, buffer);
+    glBufferData(usageFlags, data.size() * sizeof(TType), data.data(), GL_STATIC_DRAW);
+    glBindBuffer(usageFlags, 0);
     return buffer;
 }
-inline void destroy_vertex_buffer(GLuint buffer)
+inline void destroy_buffer(GLuint buffer)
 {
     glDeleteBuffers(1, &buffer);
 }
 
-inline GLuint create_vertex_array(const GLuint &vbo)
+inline GLuint create_vertex_array(GLuint vbo, const GLuint *ebo)
 {
     GLuint array;
     glGenVertexArrays(1, &array);
     glBindVertexArray(array);
 
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    if (ebo)
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, *ebo);
 
     // strides
     glEnableVertexAttribArray(0);
@@ -48,9 +50,11 @@ inline GLuint create_vertex_array(const GLuint &vbo)
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FLOAT, sizeof(Vertex), (void *)offsetof(Vertex, color));
     glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FLOAT, sizeof(Vertex), (void*)offsetof(Vertex, uv));
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FLOAT, sizeof(Vertex), (void *)offsetof(Vertex, uv));
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
+    if (ebo)
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
     glBindVertexArray(0);
     return array;
@@ -111,4 +115,27 @@ inline void destroy_shader_program(GLuint program)
     glDeleteProgram(program);
 }
 } // namespace Shader
+
+namespace Render
+{
+inline void draw_object(GLuint program, GLuint vao, int vertexCount)
+{
+    glUseProgram(program);
+
+    glBindVertexArray(vao);
+    glDrawArrays(GL_TRIANGLES, 0, vertexCount);
+    glBindVertexArray(0);
+}
+
+inline void draw_element_object(GLuint program, GLuint vao, GLuint ebo, int indexCount)
+{
+    glUseProgram(program);
+
+    glBindVertexArray(vao);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+    glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, 0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+}
+} // namespace Render
 } // namespace RHI
