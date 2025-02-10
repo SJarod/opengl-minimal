@@ -29,9 +29,9 @@ template <typename TType> inline GLuint create_buffer(std::vector<TType> data, G
     glBindBuffer(usageFlags, 0);
     return buffer;
 }
-inline void destroy_buffer(GLuint buffer)
+inline void destroy_buffer(GLuint *buffer)
 {
-    glDeleteBuffers(1, &buffer);
+    glDeleteBuffers(1, buffer);
 }
 
 inline GLuint create_vertex_array(GLuint vbo, const GLuint *ebo)
@@ -59,15 +59,39 @@ inline GLuint create_vertex_array(GLuint vbo, const GLuint *ebo)
     glBindVertexArray(0);
     return array;
 }
-inline void destroy_vertex_array(GLuint array)
+inline void destroy_vertex_array(GLuint *array)
 {
-    glDeleteVertexArrays(1, &array);
+    glDeleteVertexArrays(1, array);
 }
 } // namespace Buffer
 
 namespace Image
 {
+inline GLuint create_texture(int width, int height, std::vector<unsigned char> data, bool bGenerateMipMap = true)
+{
+    GLuint texture;
 
+    glGenTextures(1, &texture);
+
+    glBindTexture(GL_TEXTURE_2D, texture);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data.data());
+    if (bGenerateMipMap)
+        glGenerateMipmap(GL_TEXTURE_2D);
+
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    return texture;
+}
+inline void destroy_texture(GLuint *texture)
+{
+    glDeleteTextures(1, texture);
+}
 } // namespace Image
 } // namespace Memory
 
@@ -136,6 +160,12 @@ inline void draw_element_object(GLuint program, GLuint vao, GLuint ebo, int inde
     glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
+}
+
+inline void bind_texture(GLuint texture)
+{
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, texture);
 }
 } // namespace Render
 } // namespace RHI

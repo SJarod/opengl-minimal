@@ -39,6 +39,9 @@ int main()
 
     GLuint program = RHI::Shader::create_shader_program(triangleVertSrc, triangleFragSrc);
 
+    const std::vector<unsigned char> imagePixels = {255, 0, 0, 255, 0, 255, 0, 255, 0, 0, 255, 255, 255, 0, 255, 255};
+    GLuint tex = RHI::Memory::Image::create_texture(2, 2, imagePixels);
+
     while (!glfwWindowShouldClose(window))
     {
         glfwSwapBuffers(window);
@@ -49,6 +52,7 @@ int main()
         glClearColor(0.2f, 0.2f, 0.2f, 1.f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        RHI::Render::bind_texture(tex);
         RHI::Render::draw_element_object(program, vao, ebo, indices.size());
     }
 

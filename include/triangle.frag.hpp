@@ -3,12 +3,15 @@
 const char *triangleFragSrc = R"GLSL(
     #version 450 core
     
-    in vec3 oFrag;
+    in vec3 fragColor;
+    in vec2 fragUV;
     
     out vec4 oColor;
+
+    uniform sampler2D texSampler;
     
     void main()
     {
-        oColor = vec4(oFrag, 1.0);
+        oColor = texture(texSampler, fragUV);
     }
     )GLSL";
